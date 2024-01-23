@@ -40,12 +40,12 @@ async function run() {
   try {
 
     //collections
-    const userCollection = client.db("serenityHeaven").collection("users");
-    const apartmentCollection = client.db("serenityHeaven").collection("apartments");
-    const agreementCollection = client.db("serenityHeaven").collection("agreements");
-    const announcementCollection = client.db("serenityHeaven").collection("announcements");
-    const couponCollection = client.db("serenityHeaven").collection("coupons");
-    const paymentCollection = client.db("serenityHeaven").collection("payments");
+    const userCollection = client.db("hunterDB").collection("users");
+    const apartmentCollection = client.db("hunterDB").collection("apartments");
+    const agreementCollection = client.db("hunterDB").collection("agreements");
+    const announcementCollection = client.db("hunterDB").collection("announcements");
+    const couponCollection = client.db("hunterDB").collection("coupons");
+    const paymentCollection = client.db("hunterDB").collection("payments");
 
     // jwt related api
     app.post('/jwt', async (req, res) => {
@@ -337,14 +337,7 @@ async function run() {
       res.send(result);
     });
 
-    
 
-      console.log(paymentIntent.id),
-      res.send({
-        clientSecret: paymentIntent.client_secret,
-       
-      });
-    });
 
 
     // Connect the client to the server	(optional starting in v4.7)
