@@ -250,6 +250,12 @@ async function run() {
       const result = await apartmentCollection.find().toArray();
       res.send(result);
     })
+  //add new apartment
+    app.post('/apartments', async (req, res) => {
+        const Item = req.body;
+        const result = await agreementCollection.insertOne(Item);
+        res.send(result);
+      });
 
 
     app.get('/apartments/:id', async (req, res) => {
