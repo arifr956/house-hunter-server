@@ -3,8 +3,6 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const app = express();
 require('dotenv').config()
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-
 const { ObjectId } = require('mongodb');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const port = process.env.PORT || 5000;
@@ -15,8 +13,8 @@ app.use(cors(
   {
     origin: [
       'http://localhost:5173',
-      'https://serenity-heaven-client-c3712.web.app',
-      `https://serenity-heaven-client-c3712.firebaseapp.com`,
+      'https://house-hunter-client.web.app/',
+      `https://house-hunter-client.firebaseapp.com/`,
     ],
     credentials: true
   }
@@ -40,12 +38,11 @@ async function run() {
   try {
 
     //collections
-    const userCollection = client.db("hunterDB").collection("users");
+    const userCollection = client.db("hunterDB").collection("user");
     const apartmentCollection = client.db("hunterDB").collection("apartments");
     const agreementCollection = client.db("hunterDB").collection("agreements");
     const announcementCollection = client.db("hunterDB").collection("announcements");
-    const couponCollection = client.db("hunterDB").collection("coupons");
-    const paymentCollection = client.db("hunterDB").collection("payments");
+  
 
     // jwt related api
     app.post('/jwt', async (req, res) => {
@@ -82,14 +79,14 @@ async function run() {
     }
 
 
-    // users related api
-    app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+    // user related api
+    app.get('/user', verifyToken, verifyAdmin, async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
 
     //admin show
-    app.get('/users/admin/:email', verifyToken, async (req, res) => {
+    app.get('/user/admin/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
 
       if (email !== req.decoded.email) {
@@ -106,7 +103,7 @@ async function run() {
     })
 
 
-    app.post('/users', async (req, res) => {
+    app.post('/user', async (req, res) => {
       const user = req.body;
       // insert email if user doesnt exists: 
       // you can do this many ways (1. email unique, 2. upsert 3. simple checking)
@@ -122,7 +119,7 @@ async function run() {
     //make admin
     // admin email: arif@gmail.com password: Arif12@
 
-    app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
+    app.patch('/user/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
@@ -135,7 +132,7 @@ async function run() {
     })
 
     //make member
-    app.patch('/users/member/:id', verifyToken, verifyAdmin, async (req, res) => {
+    app.patch('/user/member/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
@@ -148,7 +145,7 @@ async function run() {
     })
 
     //make member using email
-    app.patch('/users/:email', verifyToken, verifyAdmin, async (req, res) => {
+    app.patch('/user/:email', verifyToken, verifyAdmin, async (req, res) => {
       const email = req.params.email;
       const filter = { email: email };
       const updatedDoc = {
@@ -162,7 +159,7 @@ async function run() {
 
 
     //Remove member set to user
-    app.patch('/users/user/:id', verifyToken, verifyAdmin, async (req, res) => {
+    app.patch('/user/user/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
@@ -177,7 +174,7 @@ async function run() {
 
 
     //member show
-    app.get('/users/member/:email', verifyToken, async (req, res) => {
+    app.get('/user/member/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
 
       if (email !== req.decoded.email) {
@@ -195,7 +192,7 @@ async function run() {
 
 
     //delete user
-    app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
+    app.delete('/user/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const result = await userCollection.deleteOne(query);
@@ -215,29 +212,6 @@ async function run() {
     })
 
 
-    //coupon part
-    app.get('/coupons', async (req, res) => {
-
-      const result = await couponCollection.find().toArray();
-      res.send(result);
-    })
-
-
-
-    //create coupon
-    app.post('/coupons', verifyToken, verifyAdmin, async (req, res) => {
-      const couponItem = req.body;
-      const result = await couponCollection.insertOne(couponItem);
-      res.send(result);
-    });
-
-    //delete coupon
-    app.delete('/coupons/:id', verifyToken, verifyAdmin, async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
-      const result = await couponCollection.deleteOne(query);
-      res.send(result);
-    })
 
     //agreement parts
 
@@ -300,7 +274,7 @@ async function run() {
     })
 
     //user part 
-    app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+    app.get('/user', verifyToken, verifyAdmin, async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
@@ -319,23 +293,23 @@ async function run() {
       res.send(result);
     });
 
-    //payment part
-    app.get('/payments/:email', verifyToken, async (req, res) => {
-      const query = { email: req.params.email }
-      if (req.params.email !== req.decoded.email) {
-        return res.status(403).send({ message: 'forbidden access' });
-      }
-      const result = await paymentCollection.find(query).toArray();
-      res.send(result);
-    })
+    // //payment part
+    // app.get('/payments/:email', verifyToken, async (req, res) => {
+    //   const query = { email: req.params.email }
+    //   if (req.params.email !== req.decoded.email) {
+    //     return res.status(403).send({ message: 'forbidden access' });
+    //   }
+    //   const result = await paymentCollection.find(query).toArray();
+    //   res.send(result);
+    // })
 
 
 
-    app.post('/payments', async (req, res) => {
-      const paymentItem = req.body;
-      const result = await paymentCollection.insertOne(paymentItem);
-      res.send(result);
-    });
+    // app.post('/payments', async (req, res) => {
+    //   const paymentItem = req.body;
+    //   const result = await paymentCollection.insertOne(paymentItem);
+    //   res.send(result);
+    // });
 
 
 
