@@ -103,6 +103,22 @@ async function run() {
     })
 
 
+    // Check User (LOGIN) API ========================================== >>>>>>
+    app.put('/user', async (req, res) => {
+        try {
+            const data = req.body;
+            const query = { email: data.email, password: data.password };
+            const result = await userCollection.findOne(query);
+            if (result == null) {
+                res.send({ flag: -1 })
+            }
+            res.send(result);
+        } catch (err) {
+            console.log(err);
+        }
+    })
+
+
     app.post('/user', async (req, res) => {
       const user = req.body;
       // insert email if user doesnt exists: 
